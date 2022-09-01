@@ -31,13 +31,13 @@ class MobileScanner extends StatefulWidget {
   ///
   final bool freeze;
   const MobileScanner({
-    super.key,
+    Key? key,
     required this.onDetect,
     this.controller,
     this.fit = BoxFit.cover,
     this.allowDuplicates = false,
     this.freeze = false,
-  });
+  }) : super(key: key);
 
   @override
   State<MobileScanner> createState() => _MobileScannerState();
@@ -50,7 +50,7 @@ class _MobileScannerState extends State<MobileScanner>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
     controller = widget.controller ?? MobileScannerController();
     if (!controller.isStarting) controller.start();
   }
@@ -134,7 +134,7 @@ class _MobileScannerState extends State<MobileScanner>
   @override
   void dispose() {
     controller.dispose();
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 }
