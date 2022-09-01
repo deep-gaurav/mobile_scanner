@@ -104,7 +104,11 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
                 scanner.process(inputImage)
                         .addOnSuccessListener { barcodes ->
                             for (barcode in barcodes) {
-                                val event = mapOf("name" to "barcode", "data" to barcode.data)
+                                val event = mapOf("name" to "barcode", "data" to barcode.data,
+                                    "imagewidth" to inputImage.width,
+                                        "imageheight" to inputImage.height,
+                                        "rotation" to imageProxy.imageInfo.rotationDegrees
+                                )
                                 sink?.success(event)
                             }
                         }

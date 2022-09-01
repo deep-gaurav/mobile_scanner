@@ -28,12 +28,15 @@ class MobileScanner extends StatefulWidget {
   final bool allowDuplicates;
 
   /// Create a [MobileScanner] with a [controller], the [controller] must has been initialized.
+  ///
+  final bool freeze;
   const MobileScanner({
     super.key,
     required this.onDetect,
     this.controller,
     this.fit = BoxFit.cover,
     this.allowDuplicates = false,
+    this.freeze = false,
   });
 
   @override
@@ -98,7 +101,10 @@ class _MobileScannerState extends State<MobileScanner>
                   height: value.size.height,
                   child: kIsWeb
                       ? HtmlElementView(viewType: value.webId!)
-                      : Texture(textureId: value.textureId!),
+                      : Texture(
+                          textureId: value.textureId!,
+                          freeze: widget.freeze,
+                        ),
                 ),
               ),
             ),

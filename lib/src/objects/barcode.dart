@@ -72,6 +72,10 @@ class Barcode {
   /// Gets parsed WiFi AP details.
   final WiFi? wifi;
 
+  final num? rotation;
+  final num? width;
+  final num? height;
+
   Barcode({
     this.corners,
     this.format = BarcodeFormat.ean13,
@@ -87,12 +91,19 @@ class Barcode {
     this.url,
     this.wifi,
     this.displayValue,
+    this.rotation,
+    this.width,
+    this.height,
     required this.rawValue,
   });
 
   /// Create a [Barcode] from native data.
-  Barcode.fromNative(Map data)
-      : corners = toCorners(data['corners'] as List?),
+  Barcode.fromNative(
+    Map data, {
+    this.rotation,
+    this.width,
+    this.height,
+  })  : corners = toCorners(data['corners'] as List?),
         format = toFormat(data['format'] as int),
         rawBytes = data['rawBytes'] as Uint8List?,
         rawValue = data['rawValue'] as String?,

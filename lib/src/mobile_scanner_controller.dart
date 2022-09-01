@@ -95,7 +95,12 @@ class MobileScannerController {
         torchState.value = state;
         break;
       case 'barcode':
-        final barcode = Barcode.fromNative(data as Map? ?? {});
+        final barcode = Barcode.fromNative(
+          data as Map? ?? {},
+          height: event["imageheight"] as num?,
+          width: event["imagewidth"] as num?,
+          rotation: event["rotation"] as num?,
+        );
         barcodesController.add(barcode);
         break;
       case 'barcodeMac':
