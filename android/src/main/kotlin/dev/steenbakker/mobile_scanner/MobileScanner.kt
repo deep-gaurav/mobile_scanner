@@ -242,16 +242,33 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
         val inputImage = InputImage.fromFilePath(activity, uri)
 
         var barcodeFound = false
+        var barCodesRes = listOf<Map<String,Any>>();
+
         scanner.process(inputImage)
             .addOnSuccessListener { barcodes ->
                 for (barcode in barcodes) {
                     barcodeFound = true
-                    sink?.success(mapOf("name" to "barcode", "data" to barcode.data))
+                    val bCode = mapOf("name" to "barcode", "data" to barcode.data,
+                            "imagewidth" to inputImage.width,
+                            "imageheight" to inputImage.height,
+                            "rotation" to 0
+                    )
+                    barCodesRes = barCodesRes + mapOf("name" to "barcode", "data" to barcode.data,
+                            "imagewidth" to inputImage.width,
+                            "imageheight" to inputImage.height,
+                            "rotation" to 0
+                    )
+                    sink?.success(mapOf("name" to "barcode", "data" to barcode.data,
+                            "imagewidth" to inputImage.width,
+                            "imageheight" to inputImage.height,
+                            "rotation" to 0
+                        )
+                    )
                 }
             }
             .addOnFailureListener { e -> Log.e(TAG, e.message, e)
                 result.error(TAG, e.message, e)}
-            .addOnCompleteListener { result.success(barcodeFound) }
+            .addOnCompleteListener { result.success(barCodesRes) }
 
     }
 
