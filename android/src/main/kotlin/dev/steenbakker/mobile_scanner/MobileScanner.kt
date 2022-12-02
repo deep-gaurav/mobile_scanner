@@ -258,12 +258,6 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
                             "imageheight" to inputImage.height,
                             "rotation" to 0
                     )
-                    sink?.success(mapOf("name" to "barcode", "data" to barcode.data,
-                            "imagewidth" to inputImage.width,
-                            "imageheight" to inputImage.height,
-                            "rotation" to 0
-                        )
-                    )
                 }
             }
             .addOnFailureListener { e -> Log.e(TAG, e.message, e)
