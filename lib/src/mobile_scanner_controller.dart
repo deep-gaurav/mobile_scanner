@@ -267,10 +267,23 @@ class MobileScannerController {
   /// Returns false if nothing is found.
   ///
   /// [path] The path of the image on the devices
-  Future<bool> analyzeImage(String path) async {
+  Future<List<Barcode>> analyzeImage(String path) async {
     return methodChannel
-        .invokeMethod<bool>('analyzeImage', path)
-        .then<bool>((bool? value) => value ?? false);
+        .invokeListMethod<Map>('analyzeImage', path)
+        .then((List<Map>? value) async {
+      final codes = <Barcode>[];
+      for (final code in value ?? []) {
+        codes.add(
+          Barcode.fromNative(
+            (code['data'] as Map?) ?? {},
+            height: code["imageheight"] as num?,
+            width: code["imagewidth"] as num?,
+            rotation: code["rotation"] as num?,
+          ),
+        );
+      }
+      return codes;
+    });
   }
 
   /// Disposes the MobileScannerController and closes all listeners.

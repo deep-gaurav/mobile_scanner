@@ -139,11 +139,14 @@ class _BarcodeScannerWithControllerState
                             source: ImageSource.gallery,
                           );
                           if (image != null) {
-                            if (await controller.analyzeImage(image.path)) {
+                            var codes =
+                                await controller.analyzeImage(image.path);
+                            if (codes.isNotEmpty) {
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Barcode found!'),
+                                SnackBar(
+                                  content:
+                                      Text(codes.map((e) => e.rawValue).join()),
                                   backgroundColor: Colors.green,
                                 ),
                               );
