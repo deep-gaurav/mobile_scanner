@@ -211,6 +211,7 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
 
                 // Enable torch if provided
                 camera!!.cameraControl.enableTorch(torch)
+                camera!!.cameraControl.startFocusAndMetering(FocusMeteringAction.Builder(SurfaceOrientedMeteringPointFactory(1F,1F).createPoint(0.5F,0.5F)).build() )
 
                 val resolution = preview!!.resolutionInfo!!.resolution
                 val portrait = camera!!.cameraInfo.sensorRotationDegrees % 180 == 0
