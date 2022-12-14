@@ -244,6 +244,12 @@ class MobileScannerController {
     }
   }
 
+  Future<double> setZoom(double zoomAmount) async {
+    ensure("setZoom");
+    var value = await methodChannel.invokeMethod('zoom', {'value': zoomAmount});
+    return value;
+  }
+
   /// Switches the torch on or off.
   ///
   /// Only works if torch is available.

@@ -54,6 +54,7 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
 //            "analyze" -> switchAnalyzeMode(call, result)
             "stop" -> stop(result)
             "analyzeImage" -> analyzeImage(call, result)
+            "zoom" -> call.argument<Float>("value")?.let { setZoom(it,result ) }
             else -> result.notImplemented()
         }
     }
@@ -182,7 +183,11 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
 
                 // Build the analyzer to be passed on to MLKit
                 val analysisBuilder = ImageAnalysis.Builder()
+
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                if(preview?.resolutionInfo?.resolution != null){
+                    analysisBuilder.setTargetResolution(preview!!.resolutionInfo!!.resolution);
+                }
                 if (ratio != null) {
                     analysisBuilder.setTargetAspectRatio(ratio)
                 }
@@ -231,6 +236,15 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
         }
         camera!!.cameraControl.enableTorch(call.arguments == 1)
         result.success(null)
+    }
+
+    private fun setZoom(value: Float, result: MethodChannel.Result){
+        if (camera == null) {
+            result.error(TAG,"Called setZoom() while stopped!", null)
+            return
+        }
+        camera!!.cameraControl.setLinearZoom(value)
+        result.success(value)
     }
 
 //    private fun switchAnalyzeMode(call: MethodCall, result: MethodChannel.Result) {
