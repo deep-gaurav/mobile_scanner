@@ -186,7 +186,10 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
 
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 if(preview?.resolutionInfo?.resolution != null){
+                    Log.i("LOG","Set analyzer size ${preview!!.resolutionInfo!!.resolution}")
                     analysisBuilder.setTargetResolution(preview!!.resolutionInfo!!.resolution);
+                }else{
+                    analysisBuilder.setTargetResolution(Size(1200,1600));
                 }
                 if (ratio != null) {
                     analysisBuilder.setTargetAspectRatio(ratio)
