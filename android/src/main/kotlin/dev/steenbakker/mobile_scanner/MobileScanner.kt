@@ -54,7 +54,7 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
 //            "analyze" -> switchAnalyzeMode(call, result)
             "stop" -> stop(result)
             "analyzeImage" -> analyzeImage(call, result)
-            "zoom" -> call.argument<Float>("value")?.let { setZoom(it,result ) }
+            "zoom" -> call.argument<Double>("value")?.let { setZoom(it.toFloat(),result ) }
             else -> result.notImplemented()
         }
     }
