@@ -14,6 +14,7 @@ class _BarcodeScannerWithControllerState
     extends State<BarcodeScannerWithController>
     with SingleTickerProviderStateMixin {
   String? barcode;
+  Barcode? barcodeVal;
 
   MobileScannerController controller = MobileScannerController(
     torchEnabled: true,
@@ -23,6 +24,51 @@ class _BarcodeScannerWithControllerState
 
   bool isStarted = true;
 
+  ValueNotifier<bool> isZooming = ValueNotifier(false);
+  double? startValue;
+  ValueNotifier<double> zoomAmount = ValueNotifier(0);
+
+  double? minZoomRatio, maxZoomRatio;
+
+  bool get isZoomRatioAvailable => minZoomRatio != null;
+  var zoomRatio = ValueNotifier(1.0);
+  var startRatio = 1.0;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) async {
+        await Future.delayed(Duration(milliseconds: 1000));
+        if (mounted) {
+          minZoomRatio = await controller.getMinZoomRatio();
+          maxZoomRatio = await controller.getMaxZoomRatio();
+          setState(() {});
+        }
+      },
+    );
+    super.initState();
+  }
+
+  handleZoom() async {
+    if (isZooming.value) {
+      return;
+    }
+    isZooming.value = true;
+    controller.setZoom(zoomAmount.value).ignore();
+    await Future.delayed(const Duration(milliseconds: 50));
+    isZooming.value = false;
+  }
+
+  handleZoomRatio() async {
+    if (isZooming.value) {
+      return;
+    }
+    isZooming.value = true;
+    controller.setZoomRatio(zoomRatio.value).ignore();
+    await Future.delayed(const Duration(milliseconds: 50));
+    isZooming.value = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,19 +77,41 @@ class _BarcodeScannerWithControllerState
         builder: (context) {
           return Stack(
             children: [
-              MobileScanner(
-                controller: controller,
-                fit: BoxFit.contain,
-                // allowDuplicates: true,
-                // controller: MobileScannerController(
-                //   torchEnabled: true,
-                //   facing: CameraFacing.front,
-                // ),
-                onDetect: (barcode, args) {
-                  setState(() {
-                    this.barcode = barcode.rawValue;
-                  });
-                },
+              Stack(
+                fit: StackFit.passthrough,
+                children: [
+                  MobileScanner(
+                    freeze: barcodeVal != null,
+                    controller: controller,
+                    fit: BoxFit.cover,
+                    // allowDuplicates: true,
+                    // controller: MobileScannerController(
+                    //   torchEnabled: true,
+                    //   facing: CameraFacing.front,
+                    // ),
+                    onDetect: (barcode, args) {
+                      setState(() {
+                        barcodeVal = barcode;
+                        this.barcode = barcode.rawValue;
+                      });
+                    },
+                  ),
+                  if (barcodeVal != null)
+                    Positioned.fill(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: UnconstrainedBox(
+                          child: SizedBox(
+                            width: barcodeVal!.width!.toDouble(),
+                            height: barcodeVal!.height!.toDouble(),
+                            child: CustomPaint(
+                              painter: PointsPainter(barcodeVal!.corners!),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               Align(
                 alignment: Alignment.bottomCenter,
@@ -166,10 +234,55 @@ class _BarcodeScannerWithControllerState
                   ),
                 ),
               ),
+              Positioned.fill(
+                child: GestureDetector(
+                  onScaleStart: (details) {
+                    setState(() {
+                      startRatio = zoomRatio.value;
+                    });
+                  },
+                  onScaleUpdate: (details) {
+                    if (isZoomRatioAvailable == false) {
+                      zoomAmount.value =
+                          ((details.scale - 1) / 1).clamp(0.0, 1.0);
+                      setState(() {
+                        handleZoom();
+                      });
+                    } else {
+                      zoomRatio.value = (details.scale * startRatio)
+                          .clamp(minZoomRatio!, maxZoomRatio!);
+                      setState(() {
+                        handleZoomRatio();
+                      });
+                    }
+                  },
+                ),
+              ),
             ],
           );
         },
       ),
     );
+  }
+}
+
+class PointsPainter extends CustomPainter {
+  List<Offset> corners;
+
+  PointsPainter(this.corners);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint()
+      ..color = Colors.pink
+      ..strokeWidth = 20;
+    for (var point in corners) {
+      canvas.drawCircle(point, 20, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }

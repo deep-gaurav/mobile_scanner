@@ -26,7 +26,7 @@ public class SwiftMobileScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
     var analyzing: Bool = false
     var position = AVCaptureDevice.Position.back
     
-    var scanner = BarcodeScanner.barcodeScanner()
+    var scanner = BarcodeScanner.barcodeScanner(options: BarcodeScannerOptions(formats: BarcodeFormat.qrCode))
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let instance = SwiftMobileScannerPlugin(registrar.textures())
@@ -61,6 +61,12 @@ public class SwiftMobileScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
             stop(result)
         case "analyzeImage":
             analyzeImage(call, result)
+        case "zoomRatio":
+            setZoomRatio(call, result)
+        case "minZoomRatio":
+            getMinZoomRatio(call,result)
+        case "maxZoomRatio":
+            getMaxZoomRatio(call,result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -108,7 +114,11 @@ public class SwiftMobileScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
             scanner.process(image) { [self] barcodes, error in
                 if error == nil && barcodes != nil {
                     for barcode in barcodes! {
-                        let event: [String: Any?] = ["name": "barcode", "data": barcode.data]
+                        let event: [String: Any?] = ["name": "barcode", "data": barcode.data,
+                                                     "imagewidth":buffer?.image.size.width,
+                                                     "imageheight":buffer?.image.size.height,
+                                                     "rotation":0.0
+                        ]
                         sink?(event)
                     }
                 }
@@ -179,7 +189,7 @@ public class SwiftMobileScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
         }
         
         if (formatList.count != 0) {
-            let barcodeOptions = BarcodeScannerOptions(formats: formatList.firstObject as! BarcodeFormat)
+            let barcodeOptions = BarcodeScannerOptions(formats: BarcodeFormat.qrCode)
             scanner = BarcodeScanner.barcodeScanner(options: barcodeOptions)
         }
         
@@ -263,6 +273,52 @@ public class SwiftMobileScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
         }
     }
     
+    func setZoomRatio(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        if (device == nil) {
+            result(FlutterError(code: "MobileScanner",
+                                    message: "Called setZoomRatio() while stopped!",
+                                    details: nil))
+            return
+        }
+        let argReader = MapArgumentReader(call.arguments as? [String: Any])
+        let value = argReader.double(key: "value") ?? 1.0
+        
+        do {
+            try device.lockForConfiguration()
+            device.ramp(toVideoZoomFactor: value, withRate: 10.0)
+            device.unlockForConfiguration()
+            result(value)
+        } catch {
+            error.throwNative(result)
+        }
+        result(value)
+        
+    }
+    
+    func getMinZoomRatio(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        if (device == nil) {
+            result(FlutterError(code: "MobileScanner",
+                                    message: "Called getMinZoomRatio() while stopped!",
+                                    details: nil))
+            return
+        }
+        let value = device.minAvailableVideoZoomFactor;
+        result(value)
+        
+    }
+    
+    func getMaxZoomRatio(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        if (device == nil) {
+            result(FlutterError(code: "MobileScanner",
+                                    message: "Called getMaxZoomRatio() while stopped!",
+                                    details: nil))
+            return
+        }
+        let value = device.maxAvailableVideoZoomFactor;
+        result(value)
+        
+    }
+    
 //    func switchAnalyzeMode(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 //        analyzeMode = call.arguments as! Int
 //        result(nil)
@@ -290,7 +346,11 @@ public class SwiftMobileScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
             if error == nil && barcodes != nil {
                 for barcode in barcodes! {
                     barcodeFound = true
-                    let event: [String: Any?] = ["name": "barcode", "data": barcode.data]
+                    let event: [String: Any?] = ["name": "barcode", "data": barcode.data,
+                                                 "imagewidth":uiImage?.size.width,
+                                                 "imageheight":uiImage?.size.height,
+                                                 "rotation":0.0,
+                    ]
                     sink?(event)
                 }
             } else if error != nil {
@@ -359,6 +419,9 @@ class MapArgumentReader {
   func int(key: String) -> Int? {
     return (args?[key] as? NSNumber)?.intValue
   }
+    func double(key: String) -> Double? {
+        return (args?[key] as? NSNumber)?.doubleValue
+    }
     
     func bool(key: String) -> Bool? {
       return (args?[key] as? NSNumber)?.boolValue
