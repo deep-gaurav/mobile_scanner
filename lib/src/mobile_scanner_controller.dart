@@ -250,6 +250,25 @@ class MobileScannerController {
     return value;
   }
 
+  Future<double> setZoomRatio(double zoomAmount) async {
+    ensure("setZoomRatio");
+    var value =
+        await methodChannel.invokeMethod('zoomRatio', {'value': zoomAmount});
+    return value;
+  }
+
+  Future<double> getMinZoomRatio() async {
+    ensure("getMinZoomRatio");
+    var value = await methodChannel.invokeMethod('minZoomRatio');
+    return value;
+  }
+
+  Future<double> getMaxZoomRatio() async {
+    ensure("getMaxZoomRatio");
+    var value = await methodChannel.invokeMethod('maxZoomRatio');
+    return value;
+  }
+
   /// Switches the torch on or off.
   ///
   /// Only works if torch is available.

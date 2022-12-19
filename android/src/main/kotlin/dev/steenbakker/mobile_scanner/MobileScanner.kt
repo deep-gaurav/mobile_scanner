@@ -61,6 +61,10 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
             "stop" -> stop(result)
             "analyzeImage" -> analyzeImage(call, result)
             "zoom" -> call.argument<Double>("value")?.let { setZoom(it.toFloat(),result ) }
+
+            "zoomRatio" -> call.argument<Double>("value")?.let { setZoomRatio(it.toFloat(),result ) }
+            "minZoomRatio" -> getMinZoomRatio(result )
+            "maxZoomRatio" -> getMaxZoomRatio(result )
             else -> result.notImplemented()
         }
     }
@@ -265,6 +269,43 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
                 result.error(TAG,"setZoom failed", null)
             }
         }
+    }
+
+    private fun setZoomRatio(value: Float, result: MethodChannel.Result){
+        if (camera == null) {
+            result.error(TAG,"Called setZoom() while stopped!", null)
+            return
+        }
+        val future = camera!!.cameraControl.setZoomRatio(value)
+        GlobalScope.launch {
+            try {
+
+                future.await()
+
+                result.success(value.toDouble())
+            }
+            catch (e: Throwable){
+                result.error(TAG,"setZoom failed", null)
+            }
+        }
+    }
+
+    private fun getMinZoomRatio(result: MethodChannel.Result){
+        if (camera == null) {
+            result.error(TAG,"Called getMinZoomRatio() while stopped!", null)
+            return
+        }
+        result.success(
+                camera!!.cameraInfo.zoomState.value?.minZoomRatio)
+    }
+
+    private fun getMaxZoomRatio(result: MethodChannel.Result){
+        if (camera == null) {
+            result.error(TAG,"Called getMinZoomRatio() while stopped!", null)
+            return
+        }
+        result.success(
+                camera!!.cameraInfo.zoomState.value?.maxZoomRatio)
     }
 
 //    private fun switchAnalyzeMode(call: MethodCall, result: MethodChannel.Result) {
