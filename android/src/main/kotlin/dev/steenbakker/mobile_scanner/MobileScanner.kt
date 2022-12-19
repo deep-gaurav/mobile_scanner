@@ -131,7 +131,11 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
     }
 
 
-    private var scanner = BarcodeScanning.getClient()
+    private var scanner = BarcodeScanning.getClient(
+            BarcodeScannerOptions.Builder()
+                    .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                    .build()
+    )
 
     @ExperimentalGetImage
     private fun start(call: MethodCall, result: MethodChannel.Result) {
