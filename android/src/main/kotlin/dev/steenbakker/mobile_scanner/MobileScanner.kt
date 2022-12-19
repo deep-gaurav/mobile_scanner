@@ -259,7 +259,7 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
 
                 future.await()
 
-                result.success(value)
+                result.success(value.toDouble())
             }
             catch (e: Throwable){
                 result.error(TAG,"setZoom failed", null)
