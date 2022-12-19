@@ -266,7 +266,7 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
                 result.success(value.toDouble())
             }
             catch (e: Throwable){
-                result.error(TAG,"setZoom failed", null)
+                result.error(TAG,"setZoom failed", e.stackTraceToString())
             }
         }
     }
@@ -285,7 +285,7 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
                 result.success(value.toDouble())
             }
             catch (e: Throwable){
-                result.error(TAG,"setZoom failed", null)
+                result.error(TAG,"setZoom failed", e.stackTraceToString())
             }
         }
     }
