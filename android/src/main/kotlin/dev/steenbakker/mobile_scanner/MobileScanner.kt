@@ -14,6 +14,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import com.google.common.util.concurrent.FutureCallback
+import com.google.common.util.concurrent.Futures
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -23,7 +25,11 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import io.flutter.view.TextureRegistry
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.guava.await
+import kotlinx.coroutines.launch
 import java.io.File
+
 
 
 class MobileScanner(private val activity: Activity, private val textureRegistry: TextureRegistry)
@@ -238,6 +244,7 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
             return
         }
         camera!!.cameraControl.enableTorch(call.arguments == 1)
+
         result.success(null)
     }
 
@@ -246,8 +253,18 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
             result.error(TAG,"Called setZoom() while stopped!", null)
             return
         }
-        camera!!.cameraControl.setLinearZoom(value)
-        result.success(value)
+        val future = camera!!.cameraControl.setLinearZoom(value)
+        GlobalScope.launch {
+            try {
+
+                future.await()
+
+                result.success(value)
+            }
+            catch (e: Throwable){
+                result.error(TAG,"setZoom failed", null)
+            }
+        }
     }
 
 //    private fun switchAnalyzeMode(call: MethodCall, result: MethodChannel.Result) {
