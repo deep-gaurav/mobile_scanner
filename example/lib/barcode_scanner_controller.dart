@@ -36,7 +36,7 @@ class _BarcodeScannerWithControllerState
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback(
+    WidgetsBinding.instance?.addPostFrameCallback(
       (timeStamp) async {
         await Future.delayed(Duration(milliseconds: 1000));
         if (mounted) {

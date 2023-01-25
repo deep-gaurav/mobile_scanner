@@ -28,6 +28,9 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
+  pod 'MLKitVision', :podspec => 'MLKitVision.podspec.json'
+  pod 'MLKitCommon', :podspec => 'MLKitCommon.podspec.json'
+
   use_frameworks!
   use_modular_headers!
 
