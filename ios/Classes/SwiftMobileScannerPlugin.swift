@@ -340,18 +340,17 @@ public class SwiftMobileScannerPlugin: NSObject, FlutterPlugin, FlutterStreamHan
           defaultOrientation: .portrait
         )
         
-        var barcodeFound = false
+        var barcodeFound: [[String: Any?]] = []
 
         scanner.process(image) { [self] barcodes, error in
             if error == nil && barcodes != nil {
                 for barcode in barcodes! {
-                    barcodeFound = true
-                    let event: [String: Any?] = ["name": "barcode", "data": barcode.data,
-                                                 "imagewidth":uiImage?.size.width,
-                                                 "imageheight":uiImage?.size.height,
-                                                 "rotation":0.0,
-                    ]
-                    sink?(event)
+                    barcodeFound.append(["name": "barcode", "data": barcode.data,
+                                         "imagewidth":uiImage?.size.width,
+                                         "imageheight":uiImage?.size.height,
+                                         "rotation":0.0,
+            ])
+                    
                 }
             } else if error != nil {
                 result(FlutterError(code: "MobileScanner",
