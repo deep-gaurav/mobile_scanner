@@ -182,10 +182,15 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
                 }
                 // Preview
                 val surfaceProvider = Preview.SurfaceProvider { request ->
-                    val texture = textureEntry!!.surfaceTexture()
-                    texture.setDefaultBufferSize(request.resolution.width, request.resolution.height)
-                    val surface = Surface(texture)
-                    request.provideSurface(surface, executor) { }
+                    if(textureEntry!=null) {
+                        val texture = textureEntry!!.surfaceTexture()
+                        texture.setDefaultBufferSize(
+                            request.resolution.width,
+                            request.resolution.height
+                        )
+                        val surface = Surface(texture)
+                        request.provideSurface(surface, executor) { }
+                    }
                 }
 
                 // Build the preview to be shown on the Flutter texture
@@ -233,6 +238,7 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
 
                 // Enable torch if provided
                 camera!!.cameraControl.enableTorch(torch)
+                camera!!.cameraControl
                 camera!!.cameraControl.startFocusAndMetering(FocusMeteringAction.Builder(SurfaceOrientedMeteringPointFactory(1F,1F).createPoint(0.5F,0.5F)).build() )
 
                 val resolution = preview!!.resolutionInfo!!.resolution
